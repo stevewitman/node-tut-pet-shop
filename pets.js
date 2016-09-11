@@ -13,6 +13,8 @@ if (cmd === 'read') {
   createPet(process.argv[3], process.argv[4], process.argv[5]);
 } else if (cmd === 'update') {
   updatePet(process.argv[3], process.argv[4], process.argv[5], process.argv[6]);
+} else if (cmd === 'destroy') {
+  destroyPet(process.argv[3]);
 } else {
   console.error(`Usage: ${node} ${file} [read | create | update | destroy]`);
   process.exit(1);
@@ -28,10 +30,9 @@ function readPet(index) {
       throw err;
     }
     var pets = JSON.parse(data);
-    console.log('params:', index);
     if (index) {
-      if (isNormalInteger(index) && param1 >= 0 && param1 < pets.length) {
-        pets = pets[param1];
+      if (isNormalInteger(index) && index >= 0 && index < pets.length) {
+        pets = pets[index];
       } else {
         console.error(`Usage: ${node} ${file} read INDEX`);
         process.exit(1);
@@ -91,4 +92,28 @@ function updatePet(index, age, kind, name) {
       process.exit(1);
     }
   });
+}
+
+function destroyPet(index) {
+  fs.readFile(petsPath, 'utf8', function(err, data) {
+    if (err) {
+      throw err;
+    }
+    var pets = JSON.parse(data);
+    if (index) {
+      if (isNormalInteger(index) && index >= 0 && index < pets.length) {
+        pets.splice(index, 1);
+        var petsJSON = JSON.stringify(pets);
+        fs.writeFile(petsPath, petsJSON, function(writeErr) {
+          if (writeErr) {
+            throw writeErr;
+          }
+        })
+        console.log(pets);
+      } else {
+        console.error(`Usage: ${node} ${file} destroy INDEX`);
+        process.exit(1);
+      }
+    }
+  })
 }
